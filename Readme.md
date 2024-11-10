@@ -57,12 +57,14 @@ The Design of service goes as per the latest spring MVC pattern
       ResponseEntity<Product> productResponseEntity = new ResponseEntity<>(product, HttpStatus.OK);
       return productResponseEntity;
     }
-  ```
- - Therefore, the custom Exception handler is as below
- - ```json
+    ```
+  - Therefore, the custom Exception handler is as below
+  - ```json
     {
       "errorCode": 100,
       "message": "Product Not Found with id21"
     }
    ```
-  - 
+
+- In order to handle exceptions in better way, spring have `@ControllerAdvice` annotation, which acts as filter between client - controller
+- `@ControllerAdvice` does final check on whatever being returned by controller, its at global level.
