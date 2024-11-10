@@ -24,16 +24,8 @@ public class ProductController {
     //get a product
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) throws ProductNotFoundException {
-        ResponseEntity<Product> productResponseEntity;
-        Product product = null;
-        //try{
-            product = productService.getProductById(id);
-
-            productResponseEntity = new ResponseEntity<>(product, HttpStatus.OK);
-        //}catch (InstanceNotFoundException exception){
-//            if(product == null ){
-//                productResponseEntity = handleInstanceNotFoundException(exception);
-//            }
+        Product product = productService.getProductById(id);
+        ResponseEntity<Product> productResponseEntity = new ResponseEntity<>(product, HttpStatus.OK);
         return productResponseEntity;
     }
 

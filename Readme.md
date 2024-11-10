@@ -48,4 +48,21 @@ The Design of service goes as per the latest spring MVC pattern
     //productResponseEntity = new ResponseEntity<Product>("Product Not found", HttpStatus.NOT_FOUND);
      throw new InstanceNotFoundException("Product Not Found with id" + id);
     }
-```
+    ```
+  - On throwing the custom exception, we have add a filter to handle any exception, `@ExceptionHanlder(customException.class)` is used to handle it.
+  - ```java
+    @GetMapping("/{id}")
+    public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) throws ProductNotFoundException {
+      Product product = productService.getProductById(id);
+      ResponseEntity<Product> productResponseEntity = new ResponseEntity<>(product, HttpStatus.OK);
+      return productResponseEntity;
+    }
+  ```
+ - Therefore, the custom Exception handler is as below
+ - ```json
+    {
+      "errorCode": 100,
+      "message": "Product Not Found with id21"
+    }
+   ```
+  - 
