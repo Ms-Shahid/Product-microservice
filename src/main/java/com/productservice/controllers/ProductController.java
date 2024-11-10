@@ -49,10 +49,16 @@ public class ProductController {
         return productService.replaceProduct(id, product);
     }
 
-    //delete product
+    //patch product
     @PatchMapping("/{id}")
-    public Product updateProduct(@PathVariable("id") Long id, @RequestBody Product product){
+    public Product updateProduct(@PathVariable("id") Long id, @RequestBody Product product) throws ProductNotFoundException {
         return productService.updateProduct(id, product);
+    }
+
+    //delete product
+    @DeleteMapping("/{id}")
+    public Product deleteProductById(@PathVariable("id") Long id ){
+        return productService.deleteProductById(id);
     }
 
 

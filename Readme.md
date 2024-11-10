@@ -17,7 +17,7 @@ The Design of service goes as per the latest spring MVC pattern
 
 - Its been implemented using **REST** based template
 - Utilizing the [FakeStore](https://fakestoreapi.com/docs) doc data
-
+- DTO's -> is the contract between 2 services, when we want to get the response, create a DTO
 
 #### Class level details 
 

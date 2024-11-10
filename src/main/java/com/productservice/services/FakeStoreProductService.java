@@ -5,14 +5,12 @@ import com.productservice.exceptions.ProductNotFoundException;
 import com.productservice.models.Category;
 import com.productservice.models.Product;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RequestCallback;
 import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
-import javax.management.InstanceNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,8 +29,6 @@ public class FakeStoreProductService implements ProductService{
                 FakeStoreProductDto.class);
 
         if( fakeStoreProductDto == null ){
-            //productResponseEntity = new ResponseEntity<Product>("Product Not found", HttpStatus.NOT_FOUND);
-//            throw new InstanceNotFoundException("Product Not Found with id" + id);
             throw new ProductNotFoundException(100L, "Product Not Found with id" + id);
         }
         return convertFakeStoreProductDtoToProduct(fakeStoreProductDto);
@@ -87,9 +83,43 @@ public class FakeStoreProductService implements ProductService{
     }
 
     @Override
-    public Product updateProduct(Long id, Product product) {
+    public Product updateProduct(Long id, Product product) throws ProductNotFoundException {
 
-        return null;
+        FakeStoreProductDto fakeStoreProductDto = new FakeStoreProductDto();
+        fakeStoreProductDto.setTitle(product.getTitle());
+        fakeStoreProductDto.setPrice(product.getPrice());
+
+        //Below is the RestTemplate, implementation
+//        RequestCallback requestCallback = this.httpEntityCallback(request, responseType);
+//        HttpMessageConverterExtractor<T> responseExtractor = new HttpMessageConverterExtractor(responseType, this.getMessageConverters(), this.logger);
+//        return this.execute(url, HttpMethod.PATCH, requestCallback, responseExtractor, (Object[])uriVariables);
+
+        //custom Patch call
+        RequestCallback requestCallback =
+                restTemplate.httpEntityCallback(fakeStoreProductDto, FakeStoreProductDto.class);
+
+        ResponseExtractor<ResponseEntity<FakeStoreProductDto>> responseExtractor =
+                restTemplate.responseEntityExtractor(FakeStoreProductDto.class);
+
+        FakeStoreProductDto fakeStoreProductDtoResponseBody = restTemplate
+                .execute("https://fakestoreapi.com/products/" + id,
+                            HttpMethod.PATCH, requestCallback, responseExtractor)
+                .getBody();
+
+        if( fakeStoreProductDtoResponseBody == null )
+            throw new ProductNotFoundException(1L, "Product Not found with id " + id);
+
+        return convertFakeStoreProductDtoToProduct(fakeStoreProductDtoResponseBody);
+    }
+
+    @Override
+    public Product deleteProductById(Long id) {
+
+        //this.execute(url, HttpMethod.DELETE, (RequestCallback)null, (ResponseExtractor)null, (Object[])uriVariables);
+        FakeStoreProductDto fakeStoreProductDto = restTemplate
+                .execute("https://fakestoreapi.com/products/" + id, HttpMethod.DELETE, null, null);
+
+        return convertFakeStoreProductDtoToProduct(fakeStoreProductDto);
     }
 
     private Product convertFakeStoreProductDtoToProduct(FakeStoreProductDto fakeStoreProductDto) {
@@ -114,5 +144,3 @@ public class FakeStoreProductService implements ProductService{
     }
 
 }
-
-//DTO's -> is the contract between 2 services, when we want to get the response, create a DTO
