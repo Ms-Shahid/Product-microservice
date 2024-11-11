@@ -4,6 +4,7 @@ import com.productservice.dtos.FakeStoreProductDto;
 import com.productservice.exceptions.ProductNotFoundException;
 import com.productservice.models.Category;
 import com.productservice.models.Product;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Primary
 public class FakeStoreProductService implements ProductService{
 
     private RestTemplate restTemplate; //a way used to call 3rd party api
@@ -120,6 +122,11 @@ public class FakeStoreProductService implements ProductService{
                 .execute("https://fakestoreapi.com/products/" + id, HttpMethod.DELETE, null, null);
 
         return convertFakeStoreProductDtoToProduct(fakeStoreProductDto);
+    }
+
+    @Override
+    public Product createProduct(Product product) {
+        return null;
     }
 
     private Product convertFakeStoreProductDtoToProduct(FakeStoreProductDto fakeStoreProductDto) {

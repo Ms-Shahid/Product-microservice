@@ -4,6 +4,7 @@ import com.productservice.dtos.ProductNotFoundExceptionDto;
 import com.productservice.exceptions.ProductNotFoundException;
 import com.productservice.models.Product;
 import com.productservice.services.ProductService;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ public class ProductController {
 
     private ProductService productService;
 
-    public ProductController(ProductService productService){
+    public ProductController(@Qualifier("customName") ProductService productService){
         this.productService = productService;
     }
 
@@ -59,6 +60,12 @@ public class ProductController {
     @DeleteMapping("/{id}")
     public Product deleteProductById(@PathVariable("id") Long id ){
         return productService.deleteProductById(id);
+    }
+
+    //JPA
+    @PostMapping
+    public Product createProduct(@RequestBody Product product){
+        return productService.createProduct(product);
     }
 
 
