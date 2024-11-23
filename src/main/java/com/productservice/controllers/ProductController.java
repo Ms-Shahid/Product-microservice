@@ -18,7 +18,7 @@ public class ProductController {
 
     private ProductService productService;
 
-    public ProductController(@Qualifier("customName") ProductService productService){
+    public ProductController(@Qualifier("selfProductService") ProductService productService){
         this.productService = productService;
     }
 
@@ -62,7 +62,7 @@ public class ProductController {
         return productService.deleteProductById(id);
     }
 
-    //JPA
+    //selfProduct - HQL based
     @PostMapping
     public Product createProduct(@RequestBody Product product){
         return productService.createProduct(product);

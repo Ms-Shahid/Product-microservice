@@ -69,7 +69,7 @@ The Design of service goes as per the latest spring MVC pattern
 - In order to handle exceptions in better way, spring have `@ControllerAdvice` annotation, which acts as filter between client - controller
 - `@ControllerAdvice` does final check on whatever being returned by controller, its at global level.
 
-## Owning the data
+## 3rd party api nuances and Response Entity
 
 - Steps required when application connects with database 
   - create a connection 
@@ -113,7 +113,7 @@ The Design of service goes as per the latest spring MVC pattern
 > NOTE : If UUID is completely random, then there will be issues with indexing. 
 For that, in order to maintain auto increment, along with Random property. For that, we can use timestamp.  to maintain the increasing order
 
-### Representing Inheritance In DB provided by JPA
+### Repositories, UUIDs, Representing Inheritance
 - How to represent Inheritance in DB, There are 4 ways are representing 
 1. **MappedSuperClass**
   - Base/parent class is Abstract, i.e no object of parent class & the inherited class to have base class property then we can use `@MappedSuperClass`
@@ -285,5 +285,94 @@ Summary,
 4) SingleTable - All attributes in single table/class
 
 
+## JPA Queries, Cardinality Mappings
+- Query Methods - Declared Queries, HQL( Hibernate Query Language ), SQL
+- Fetch Types - Eager, Lazy
+- Schema Versioning
+
+- Query Methods
+  - Declared Queries : Queries provided by JPA
+    - Example : findById(Id)
+    - No need to write queries by our own, just write the method name, the ORM will convert that method name into corresponding query
+- HQL 
+  - We can create the HQL query with **@Query** annotation, by default it will try to project the query into return type. 
+  - Say for example : 
+  ```java 
+     @Query("SELECT p.title AS title, p.description as description FROM Product p WHERE p.id = :id")
+     Product getProductByTitleAndDesc(@Param("id") Long id);
+  ```
+  - Here, ll get Error :  No converter found capable of converting from type [java.lang.String] to type [com.productservice.models.Product]
+  - For resolving this we need to create Projections, a interface that only consists of getTitle(),  getDescription() method
+  ```java
+    @Query("SELECT p.title AS title, p.description as description FROM Product p WHERE p.id = :id")
+    ProductTitleAndDescribtion getProductByTitleAndDesc(@Param("id") Long id);
+  ```
+  - We can test it in `SelfProductService.java` file, 
+  ```java
+    @Override
+    public Product getProductById(Long id) throws ProductNotFoundException {
+        ProductTitleAndDescribtion productTitleAndDescribtion = productRepo.getProductByTitleAndDesc(id);
+        System.out.println("Projections -> " + productTitleAndDescribtion.getTitle() + " " + productTitleAndDescribtion.getDescription());
+        return productRepo.findById(id).get();
+    }
+    ```
+- SQL 
+  - we can define the SQL type of query similar to HQL, this SQL query doesn't gets converted to any object, Example
+  ```java
+    @Query(value = "SELECT title, description FROM Product WHERE id = :id", nativeQuery = true)
+    ProductTitleAndDescribtion getProductByTitleAndDescSQL(@Param("id") Long id);
+  ```
+
+- Fetch Types
+  - Eager : Fetch details of inner object (say List<Products> ), along with details of outer object. Everything is eagerly loaded except _Collections_
+  - By default, _Collections_ are lazy loaded. 
+  - we can change the fetch-type as below
+```java
+@Entity
+public class Category extends BaseProduct{
+
+    private String description;
+    @OneToMany(fetch = FetchType.EAGER)
+    private List<Product> productList;
+}
+
+@Entity
+public class Product extends BaseProduct{
+
+    private String description;
+    private  Double price;
+    @ManyToOne
+    @JoinColumn
+    private Category category;
+
+}
+```
+  - Lazy : Only fetch the details of outer objects, and fetch inner object when required.
+
+
+
+### Annotations
+Spring supports various annotations, below are few of them
+
+| Annotations                    | Defined Level         | Description                                                                                                                                                  |
+|--------------------------------|-----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| @Controller                    | Class                 | informs the dispatcher servelet that this controller handles the incoming request at specified endpoint                                                      |
+| @RequestMapping                | method                | helps in declaring the custom endpoint                                                                                                                       |
+| @ResponseBody                  | method                | Informs dispatcher to return a method response as http response in web page                                                                                  |
+| @RequestMapping                | method-parameter      | Handles to get the parameters from the view                                                                                                                  |
+| @Service                       | Class                 | the business logic resides within the service layer                                                                                                          |
+| @Autowired                     | variable              | the created bean can we used without creating object of bean with Autowired                                                                                  |
+| @Primary                       | method/class          | If there are multiple @componentscan/@Service implementations, using @Primary tell spring to pick this one as primary bean to create                         |
+| @Configuration                 | App Config            | Sets up the required configurations                                                                                                                          |
+| @Qualifier(name="custom-name") | Constructor-parameter | Defined at injection (constructor injection)  parameter level, if there are multiple @Service implementations, @Qualifier will take precedence over @Primary |
+| @OneToOne                      | variable              | Defines the cardinality of 1:1 mapping                                                                                                                       |
+| @OneToMany                     | variable              | Defines the cardinality of 1 : M mapping, like Category : Product                                                                                            |
+| @ManyToOne                     | variable              | Defines the cardinality of M : 1 mapping, like student : session                                                                                             |
+| @ManyToMany                    | variable              | Defines the cardinality of M : M mapping                                                                                                                     |
+| @JoinColumn                    | variable(Foreign key) | Specifies, on which List<> of entity should be joined                                                                                                        |
+
+
 #### References 
 - [SQL Indexing](https://www.atlassian.com/data/sql/how-indexing-works)
+- [Relationship in JPA](https://www.baeldung.com/hibernate-inheritance)
+- [JPA Query Methods](https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html)
