@@ -58,7 +58,7 @@ The Design of service goes as per the latest spring MVC pattern
       return productResponseEntity;
     }
     ```
-  - Therefore, the custom Exception handler is as below
+  - Therefore, the response of custom Exception handler is as below
   - ```json
     {
       "errorCode": 100,
@@ -69,4 +69,221 @@ The Design of service goes as per the latest spring MVC pattern
 - In order to handle exceptions in better way, spring have `@ControllerAdvice` annotation, which acts as filter between client - controller
 - `@ControllerAdvice` does final check on whatever being returned by controller, its at global level.
 
+## Owning the data
 
+- Steps required when application connects with database 
+  - create a connection 
+  - define the schema ( tables & cardinalities )
+  - perform crud operations
+  - Example : 
+  ```java 
+  createProduct(Product prod){
+     Database db = new Database(URL, userName, password);
+     db.connect();
+     Query q = Insert Into Products value( );
+     db.execute(q);
+  }```
+- For defining the schema design, the closest things that connects to schema in application are models.
+- This are done using ORM( Object RelationShip Mapping ), it provides a ways to create tables based on objects & relationships
+- Benefits of ORM 
+  - Automatically creates corresponding tables for models 
+  - Automatically help us to perform CRUD operations
+  - Example : 
+  ``` java
+    productRepo.findById(id);
+  ```
+  - This line converts into 
+  ```SQL 
+    Select * FROM Products WHERE id = id
+  ```
+  
+### ORM Framework - Hibernate, MyBase 
+- At the core, there is central authority that defines how perform/define that object relationship mapping, that authority is JPA( Java Persistent API )
+- Application ( Services ) connects with <<JPA>> Interface which internally connects with ORM framework such as Hibernate, MyBase
+- Hibernate at core will connect to (Java Database Connectivity )JDBC interface, that helps to connect various databases such as MYSQL Driver, MongoDB Driver,  
+
+### Repository Pattern 
+> Where to write a code, that will interact with database ? should we club with business logic ( service layer ) ? No
+
+- Code that connects with db, should be present in different layer : Repository Layer 
+- Example : 
+   ``` java 
+   public interface ProductRepo extends JpaRepository<Product, Long>{}```
+
+> NOTE : If UUID is completely random, then there will be issues with indexing. 
+For that, in order to maintain auto increment, along with Random property. For that, we can use timestamp.  to maintain the increasing order
+
+### Representing Inheritance In DB provided by JPA
+- How to represent Inheritance in DB, There are 4 ways are representing 
+1. **MappedSuperClass**
+  - Base/parent class is Abstract, i.e no object of parent class & the inherited class to have base class property then we can use `@MappedSuperClass`
+  - Properties
+    - No Table for parent/base class
+    - One table for each subtype with their own attributes as well as from parent.
+  - Pros
+    -> we can get details of child class easily .
+  - cons
+   -> the joins will be costly, between different child attributes.
+- Example : @MappedSuperClass at the parent-class & @Entity at respective child classes
+```java
+@MappedSuperclass
+public class User {
+    @Id
+    private Long id;
+    private String name;
+    private String email;
+}
+
+@Entity(name = "Mapped_super_Stud")
+public class Student extends User{
+    private String batch;
+    private String course;
+}
+
+@Entity(name = "Mapped_super_Mentor")
+public class Mentor extends User{
+
+    private String company;
+    private double avgRating;
+}
+
+@Entity(name = "Mapped_super_Instr")
+public class Instructor extends User{
+
+    private String specialization;
+}
+```
+    
+2. **Joined Table**
+   - Here, we will create table for Parent class & every child will have table with there own attributes.
+   - All the common attributes are stored in parent class. And create tables for each sub class with there own attributes
+   - The parent <-> child relationship will be interms of Foreign Key.
+   - Pros
+     - In order to get all users, then just run -> Select email from users. 
+   - cons
+     - Joins based on the child attribute from all the child table is costly.
+     - Duplicated data. Sync issues
+   - Example 
+   ```java
+   @Entity(name = "user_joined")
+    @Inheritance(strategy = InheritanceType.JOINED)
+    public class User {
+        @Id
+        private Long id;
+        private String name;
+        private String email;
+    }
+    @Entity(name = "Mapped_super_Stud")
+    public class Student extends User{
+    private String batch;
+    private String course;
+    }
+    
+    @Entity(name = "Mapped_super_Mentor")
+    public class Mentor extends User{
+    
+        private String company;
+        private double avgRating;
+    }
+    
+    @Entity(name = "Mapped_super_Instr")
+    public class Instructor extends User{
+    
+        private String specialization;
+    }
+   ```
+3. **Table Per Class**
+ - Table per class. here we are creating table for both parent & child. 
+ - Table for each class will have there own attributes & as well as parent attributes.
+ - Example 
+   - User - id, nam e, email, password 
+   - Mentor - id, name, email, password, company, avgRating 
+   - Instructor - id, name, email, password, specialization
+ - Pros
+   -> every query is fast enough 
+ - Cons
+   -> data duplicacy & will have sync issue
+ - Example : 
+```java
+@Inheritance(strategy = InheritanceType.TABLE_PER_CLASS)
+public class User {
+    @Id
+    private Long id;
+    private String name;
+    private String email;
+}
+@Entity(name = "single_stud")
+public class Student extends User{
+    private String batch;
+    private String course;
+}
+
+@Entity(name = "single_mentor")
+public class Mentor extends User{
+
+    private String company;
+    private double avgRating;
+}
+
+@Entity(name = "single_Instr")
+public class Instructor extends User{
+
+    private String specialization;
+}
+```
+
+
+4. **Single Table**
+ - Here, we are creating table with all attributes of child as well as parent in columns 
+ - Add one extra col for user-type
+ - Example 
+   - Name, email , password, company, AvgRating, Specialization 
+ - Cons
+   - To many Nulls ( Sparse Table )
+   - waste of space.
+   - Example : @DiscriminatorValue(value = int), should be added at each child-classes with different value, this value helps to differentiate between the type of tables
+```java
+@Entity(name = "single_user")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+public class User {
+    @Id
+    private Long id;
+    private String name;
+    private String email;
+}
+
+@Entity(name = "single_stud")
+@DiscriminatorValue(value = "1")
+public class Student extends User{
+    private String batch;
+    private String course;
+}
+
+@Entity(name = "single_mentor")
+@DiscriminatorValue(value = "2")
+public class Mentor extends User{
+
+    private String company;
+    private double avgRating;
+}
+
+@Entity(name = "single_Instr")
+@DiscriminatorValue(value = "3")
+public class Instructor extends User{
+
+    private String specialization;
+}
+```
+
+Summary,
+1) MappedSuperClass - no table for parent, will make sure that all the parent attributes are inherited in the respective child class 
+
+2) JoinedTable - table for parent & child classes & link via foreign key
+
+3) Table Per class - create table for Parent class as well
+
+4) SingleTable - All attributes in single table/class
+
+
+#### References 
+- [SQL Indexing](https://www.atlassian.com/data/sql/how-indexing-works)
