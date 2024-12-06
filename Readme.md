@@ -372,6 +372,32 @@ Spring supports various annotations, below are few of them
 | @JoinColumn                    | variable(Foreign key) | Specifies, on which List<> of entity should be joined                                                                                                        |
 
 
+## Representing cardinalities Schema Versioning & migrations, N + 1 query Problem
+- We have defined the cardinalities above. 
+- What if there is requirement, to include @OneToMany & @ManyToOne in both 1 : M & M : 1 classes, usually, we have either one of them, but in case if we want to include both of them. 
+- In that case, 
+```java
+@Entity
+public class Category extends BaseProduct{
+
+    private String description;
+    @OneToMany(mappedBy = "category") // @OneToMany(mappedBy = "foreign-key-variable")
+    private List<Product> productList;
+}
+
+@Entity
+public class Product extends BaseProduct{
+
+    private String description;
+    private  Double price;
+    @ManyToOne
+    @JoinColumn
+    private Category category;
+
+}
+
+```
+
 #### References 
 - [SQL Indexing](https://www.atlassian.com/data/sql/how-indexing-works)
 - [Relationship in JPA](https://www.baeldung.com/hibernate-inheritance)
