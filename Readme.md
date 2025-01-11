@@ -10,7 +10,6 @@ The Design of service goes as per the latest spring MVC pattern
 - configs : storing any custom class configs 
 - services : handling business logic 
 
-
 -----
 
 #### Product Service Implementation
@@ -31,7 +30,25 @@ The Design of service goes as per the latest spring MVC pattern
   - JSON array, is not same as List<> of array.
 
 
-- Controller : `getProductById(id)`
+- Controller : 
+  - `replaceProduct(Long id, Product product)` 
+    - By default, `restTemplate` is implemented the `PUT` call to return `void`, but we have to return a updated product response to users,
+      - There are 2 ways to perform this, 
+        - one is call the `getProductById(id)`, then on the same id, call the update & once its updated, then make a get call again to return the updated product details to users. 2-3 network calls, high latency
+        - Implement the custom `PUT` call to return updated product details. 
+    ```java
+          RequestCallback requestCallback =
+                  restTemplate.httpEntityCallback( fakeStoreProductDto, FakeStoreProductDto.class);
+
+          ResponseExtractor<ResponseEntity<FakeStoreProductDto>> responseExtractor =
+                  restTemplate.responseEntityExtractor(FakeStoreProductDto.class);
+
+          FakeStoreProductDto fakeStoreProductDto1 = restTemplate
+                  .execute("https://fakestoreapi.com/products/" + id,
+                          HttpMethod.PUT, requestCallback, responseExtractor)
+                  .getBody();
+      ```
+- `getProductById(id)`
   - In order to handle the exception, for Product Not found, the below `ResponseEntity<>` returns compile time error 
   - error : `Requried String, Provided ResponseEntity<Product>`, therefore we have to create a exceptional handler 
   - ```java
@@ -49,15 +66,23 @@ The Design of service goes as per the latest spring MVC pattern
      throw new InstanceNotFoundException("Product Not Found with id" + id);
     }
     ```
-  - On throwing the custom exception, we have add a filter to handle any exception, `@ExceptionHanlder(customException.class)` is used to handle it.
-  - ```java
-    @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) throws ProductNotFoundException {
-      Product product = productService.getProductById(id);
-      ResponseEntity<Product> productResponseEntity = new ResponseEntity<>(product, HttpStatus.OK);
-      return productResponseEntity;
-    }
-    ```
+    - On throwing the custom exception, we have add a filter to handle any exception, `@ExceptionHanlder(customException.class)` is used to handle it.
+      - ```java
+        @GetMapping("/{id}")
+        public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) throws ProductNotFoundException {
+          Product product = productService.getProductById(id);
+          ResponseEntity<Product> productResponseEntity = new ResponseEntity<>(product, HttpStatus.OK);
+          return productResponseEntity;
+        }
+        ```
+      - If we want to return custom error code & messages, then we can create a DTO, that gets triggered by `ProductNotFoundException.class`
+      - ```java
+         @org.springframework.web.bind.annotation.ExceptionHandler(ProductNotFoundException.class)
+          public class ProductNotFoundExceptionDto {
+            Long errorCode;
+            String message;
+        }
+      ```
   - Therefore, the response of custom Exception handler is as below
   - ```json
     {
@@ -399,6 +424,7 @@ public class Product extends BaseProduct{
 ```
 
 #### References 
+- [Type Eraser](https://www.baeldung.com/java-type-erasure)
 - [SQL Indexing](https://www.atlassian.com/data/sql/how-indexing-works)
 - [Relationship in JPA](https://www.baeldung.com/hibernate-inheritance)
 - [JPA Query Methods](https://docs.spring.io/spring-data/jpa/reference/jpa/query-methods.html)

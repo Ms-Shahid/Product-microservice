@@ -13,7 +13,6 @@ public class TokenService {
         this.restTemplate = restTemplate;
     }
 
-
     public boolean validateToken(String token){
 
         UserResponseDto userResponseDto = restTemplate.getForObject(

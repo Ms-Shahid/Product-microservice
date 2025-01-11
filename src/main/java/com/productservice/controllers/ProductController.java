@@ -1,18 +1,15 @@
 package com.productservice.controllers;
 
-import com.productservice.dtos.ProductNotFoundExceptionDto;
 import com.productservice.exceptions.ProductNotFoundException;
 import com.productservice.models.Product;
 import com.productservice.services.ProductService;
 import com.productservice.services.TokenService;
-import org.antlr.v4.runtime.Token;
 import org.hibernate.cache.spi.access.UnknownAccessTypeException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import javax.management.InstanceNotFoundException;
 import java.util.List;
 
 @RestController
@@ -28,7 +25,6 @@ public class ProductController {
         this.tokenService = tokenService;
     }
 
-    //get a product
     @GetMapping("/{id}")
     public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) throws ProductNotFoundException {
         Product product = productService.getProductById(id);
