@@ -133,8 +133,8 @@ The Design of service goes as per the latest spring MVC pattern
 - Code that connects with db, should be present in different layer : Repository Layer 
 - Example : 
    ``` java 
-   public interface ProductRepo extends JpaRepository<Product, Long>{}```
-
+   public interface ProductRepo extends JPARepository<Product, Long>{}```
+- here, `JPARepository<T, ID>` takes in the generic Type of class & the primary Key of that class
 > NOTE : If UUID is completely random, then there will be issues with indexing. 
 For that, in order to maintain auto increment, along with Random property. For that, we can use timestamp.  to maintain the increasing order
 
