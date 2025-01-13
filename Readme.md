@@ -149,7 +149,10 @@ For that, in order to maintain auto increment, along with Random property. For t
     -> we can get details of child class easily .
   - cons
    -> the joins will be costly, between different child attributes.
-- Example : @MappedSuperClass at the parent-class & @Entity at respective child classes
+- Example : @MappedSuperClass at the parent-class & @Entity at respective child classes, in this case joins will be costly, say use case is get email of all users
+  - Query : ``` 
+          SELECT email FROM Student UNION SELECT email FROM Mentor UNION SELECT email from Instructor
+        ```
 ```java
 @MappedSuperclass
 public class User {
@@ -188,6 +191,10 @@ public class Instructor extends User{
    - cons
      - Joins based on the child attribute from all the child table is costly.
      - Duplicated data. Sync issues
+     - The below query gets all the emails_ids, 
+        - Query : ```
+          SELECT email FROM User```
+     - But if we want to get, `email of Mentor & Student` only then, `JOIN` is required.
    - Example 
    ```java
    @Entity(name = "user_joined")
