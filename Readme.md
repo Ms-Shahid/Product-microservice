@@ -326,8 +326,11 @@ Summary,
   - Declared Queries : Queries provided by JPA
     - Example : findById(Id)
     - No need to write queries by our own, just write the method name, the ORM will convert that method name into corresponding query
+    - The issue araises, if we want to show specific details to user, say product contains details such as _sales_no_, or _merchant_id_, by default
+    `JPA` will show all the product details, therefore, in order have specific details to be shown to user/client we can use `HQL` or `SQL`
 - HQL 
-  - We can create the HQL query with **@Query** annotation, by default it will try to project the query into return type. 
+  - We can create the HQL query with **@Query** annotation, by default it will try to project the query into return type.
+  - In `HQL`, for below query, `Product` will be object(JAVA object)
   - Say for example : 
   ```java 
      @Query("SELECT p.title AS title, p.description as description FROM Product p WHERE p.id = :id")
@@ -335,10 +338,19 @@ Summary,
   ```
   - Here, ll get Error :  No converter found capable of converting from type [java.lang.String] to type [com.productservice.models.Product]
   - For resolving this we need to create Projections, a interface that only consists of getTitle(),  getDescription() method
+  > Projections are suppose to be created when we have the requirement of getting partial data from Table/database
   ```java
     @Query("SELECT p.title AS title, p.description as description FROM Product p WHERE p.id = :id")
     ProductTitleAndDescribtion getProductByTitleAndDesc(@Param("id") Long id);
   ```
+  - Here, the `ProductTitleAndDescribtion` is just an interface defined in projections package. 
+  
+  ```java
+      public interface ProductTitleAndDescribtion { 
+          String getTitle();
+          String getDescription();
+      }
+    ```
   - We can test it in `SelfProductService.java` file, 
   ```java
     @Override
@@ -357,8 +369,9 @@ Summary,
 
 - Fetch Types
   - Eager : Fetch details of inner object (say List<Products> ), along with details of outer object. Everything is eagerly loaded except _Collections_
-  - By default, _Collections_ are lazy loaded. 
+  - By default, _Collections_ are lazy loaded.
   - we can change the fetch-type as below
+  - Specify the fetch type & on which type we need to `Join` that needs to be specified, using `@JoinColumn`
 ```java
 @Entity
 public class Category extends BaseProduct{
@@ -379,31 +392,30 @@ public class Product extends BaseProduct{
 
 }
 ```
+  - Since  by default, _Collections_ are lazy loaded, no need to specify the Fetch type for Collections
   - Lazy : Only fetch the details of outer objects, and fetch inner object when required.
+```java
+@Entity
+public class Category extends BaseProduct{
 
+    private String description;
+    @OneToMany(fetch = FetchType.LAZY) //Not required
+    private List<Product> productList;
+}
 
+@Entity
+public class Product extends BaseProduct{
 
-### Annotations
-Spring supports various annotations, below are few of them
+    private String description;
+    private  Double price;
+    @ManyToOne
+    @JoinColumn
+    private Category category;
 
-| Annotations                    | Defined Level         | Description                                                                                                                                                  |
-|--------------------------------|-----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| @Controller                    | Class                 | informs the dispatcher servelet that this controller handles the incoming request at specified endpoint                                                      |
-| @RequestMapping                | method                | helps in declaring the custom endpoint                                                                                                                       |
-| @ResponseBody                  | method                | Informs dispatcher to return a method response as http response in web page                                                                                  |
-| @RequestMapping                | method-parameter      | Handles to get the parameters from the view                                                                                                                  |
-| @Service                       | Class                 | the business logic resides within the service layer                                                                                                          |
-| @Autowired                     | variable              | the created bean can we used without creating object of bean with Autowired                                                                                  |
-| @Primary                       | method/class          | If there are multiple @componentscan/@Service implementations, using @Primary tell spring to pick this one as primary bean to create                         |
-| @Configuration                 | App Config            | Sets up the required configurations                                                                                                                          |
-| @Qualifier(name="custom-name") | Constructor-parameter | Defined at injection (constructor injection)  parameter level, if there are multiple @Service implementations, @Qualifier will take precedence over @Primary |
-| @OneToOne                      | variable              | Defines the cardinality of 1:1 mapping                                                                                                                       |
-| @OneToMany                     | variable              | Defines the cardinality of 1 : M mapping, like Category : Product                                                                                            |
-| @ManyToOne                     | variable              | Defines the cardinality of M : 1 mapping, like student : session                                                                                             |
-| @ManyToMany                    | variable              | Defines the cardinality of M : M mapping                                                                                                                     |
-| @JoinColumn                    | variable(Foreign key) | Specifies, on which List<> of entity should be joined                                                                                                        |
+}
+```
 
-
+------
 ## Representing cardinalities Schema Versioning & migrations, N + 1 query Problem
 - We have defined the cardinalities above. 
 - What if there is requirement, to include @OneToMany & @ManyToOne in both 1 : M & M : 1 classes, usually, we have either one of them, but in case if we want to include both of them. 
@@ -429,7 +441,30 @@ public class Product extends BaseProduct{
 }
 
 ```
+-------
 
+### Annotations
+Spring supports various annotations, below are few of them
+
+| Annotations                    | Defined Level         | Description                                                                                                                                                  |
+|--------------------------------|-----------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| @Controller                    | Class                 | informs the dispatcher servelet that this controller handles the incoming request at specified endpoint                                                      |
+| @RequestMapping                | method                | helps in declaring the custom endpoint                                                                                                                       |
+| @ResponseBody                  | method                | Informs dispatcher to return a method response as http response in web page                                                                                  |
+| @RequestMapping                | method-parameter      | Handles to get the parameters from the view                                                                                                                  |
+| @Service                       | Class                 | the business logic resides within the service layer                                                                                                          |
+| @Autowired                     | variable              | the created bean can we used without creating object of bean with Autowired                                                                                  |
+| @Primary                       | method/class          | If there are multiple @componentscan/@Service implementations, using @Primary tell spring to pick this one as primary bean to create                         |
+| @Configuration                 | App Config            | Sets up the required configurations                                                                                                                          |
+| @Qualifier(name="custom-name") | Constructor-parameter | Defined at injection (constructor injection)  parameter level, if there are multiple @Service implementations, @Qualifier will take precedence over @Primary |
+| @OneToOne                      | variable              | Defines the cardinality of 1:1 mapping                                                                                                                       |
+| @OneToMany                     | variable              | Defines the cardinality of 1 : M mapping, like Category : Product                                                                                            |
+| @ManyToOne                     | variable              | Defines the cardinality of M : 1 mapping, like student : session                                                                                             |
+| @ManyToMany                    | variable              | Defines the cardinality of M : M mapping                                                                                                                     |
+| @JoinColumn                    | variable(Foreign key) | Specifies, on which List<> of entity should be joined                                                                                                        |
+
+
+---------
 #### References 
 - [Type Eraser](https://www.baeldung.com/java-type-erasure)
 - [SQL Indexing](https://www.atlassian.com/data/sql/how-indexing-works)
