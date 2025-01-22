@@ -443,6 +443,59 @@ public class Product extends BaseProduct{
 ```
 -------
 
+## Testing : Unit Testing
+
+Content 
+- Why Testing 
+- TDD ( Test driven development )
+- Flaky Testing
+- Types of testing
+  - Unit 
+  - Integration
+  - Functional 
+
+Why Testing 
+- We shd write test cases that triggers automatically, before submitting the code & if the test fails then the code can't be merged
+
+TDD ( Test driven development )
+- Here, first write all the test case, before the feature is implemented.
+- Time consuming 
+- Figure out all the testcases & where the test case might get failed 
+
+Flaky Testing
+- These are tests, which sometimes fails & sometimes they succeds, example : Network tests
+- These are inconsistent & shd be avoided as much as possible
+- Example : Network tests, Randamazation, Concurrency
+
+- Types of testing
+  - Unit 
+  - Integration
+  - Functional 
+- > Ideally, if there is a dependecy of services/object, the test case shouldn't be failing because of external dependecy. Therefore **we shd test in isolation**, these is achived using mocking.
+- Example : `ProductController` is having a external dependency of `ProductService`, then we should mock `ProductService` within the same process of `ProductController`
+
+Unit Testing
+- Every individual piece of code shd be tested, Unit testing is very fast as it will be tested at function level. 
+- No dependency on any other function, every dependency shd be mocked.
+- Test coverage : min `80%`, `Jacaco` is one of the tool to check this coverage.
+
+Integration Testing
+- Testing, the flow within the project, testing each functionality of the software system, where all dependency will also be triggered as its present.
+- Example : `ProductController` -> `ProductService` -> `FakeStoreAPI`
+- This is ideally, if there are chagers for calling the 3rd party api's, partically we mock the 3rd party response & test.
+
+Functional 
+- User acceptance testing, testing the user journey, done on pre-prod / test env by QA's.
+- The key difference between Integration testing Vs Functional testing 
+- In integration testing, we test single functionality, where as in function testing we have different api calls/network calls. 
+
+> Test Graph
+
+<img src="image.png" alt="alt text" width="300">
+
+----
+
+
 ### Annotations
 Spring supports various annotations, below are few of them
 
