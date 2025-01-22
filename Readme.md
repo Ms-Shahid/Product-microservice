@@ -493,6 +493,57 @@ Functional
 
 <img src="image.png" alt="alt text" width="300">
 
+## Testing Good practices, mocking & Types of Doubles
+
+Content
+- Best practices for unit testing
+- Mocking 
+  - Types of Doubles
+
+> Unit Testing : Testing in isolation, edge cases, negative cases & happy case
+
+#### Properties of Unit testing
+- Fast, since testing small piece of code
+- will follow, 3A's/3C's framework, 
+  - Arrange/Create : create the input parameters required for testing
+  - Act/Call : Run/trigger the function which needs to be tested
+  - Assert/Check : check the response/excepted vs actual output
+```java 
+testAddition(){
+    int a = 5; int b = 10; //Arrange
+    Calculator cal = new Calculator(); 
+    x = cal.add(a, b); //Act
+    assert(x, 15); //Assert 
+}
+```
+- Isolation : Success/failure of test should not depend on any of its dependencies, in order to achieve this we should hard code, 
+the behaviours of all dependencies. we can achieve this via `mocking`
+
+- Repeatable : Testcases should be able to run again & again for same input, testCase should not be flaky 
+- Self-Checking : Every test case should be triggered automatically, there shouldn't be any human intervention.
+- Test Behaviour, Not implementation : The functionality should be tested, not the implementation as impl changes frequently,
+  - Example : expanding the LinkedIn network is a functionality, where as the internally implementation might be using some graph-algo, & that is later changed, 
+  to some other graph-algo, Therefore, the testcase should test functionality not the implementation. 
+  In simple terms, test cases shouldn't be concerned about the internal implementation.
+
+#### Mocking
+
+- Say, we have to write a testcase for `.getProductById()` which is present in `ProductController`, for which we have a dependency,
+of `ProductService`, therefore, create a `Mock` of `ProductService`, as its an external dependency to `ProductController`.
+- `Mock` 
+  - > when productService.getProductById(--), then return MockedProduct
+- To achieve mocking, we should use _Doubles_ 
+- Doubles : Sample objects that is going to replace the actual object in testing -> Mocked Objects
+- Types of Doubles
+  - Mock : A double will return the value where ever it has handled, means it returns same value irrespective of any input passed
+    - > eg : when productService.getProductById(1), then return product1
+    - Here irrespective of any value passed, it always returns `product1` as output. No dynamism possible
+    - Most commonly used double. 
+  - Stub : Stub will try to replicate some behaviours of original class, means its able to adjust some behaviours
+  - Fake : Temporary data store, where instead of triggering to database, we can replicate `FAKE` mock to use `MAP`/ `HASHMAP` to sotre
+  the data similar to db. 
+    - Fake is very close to reality.
+
 ----
 
 
