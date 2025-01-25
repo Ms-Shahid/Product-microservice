@@ -547,6 +547,8 @@ of `ProductService`, therefore, create a `Mock` of `ProductService`, as its an e
 ----
 #### Testing-3
 
+- For creating the depednecy `mock`, we have `@MockBean`, with this spring injects the bean 
+
 
 
 ### Annotations
@@ -568,6 +570,7 @@ Spring supports various annotations, below are few of them
 | @ManyToOne                     | variable              | Defines the cardinality of M : 1 mapping, like student : session                                                                                             |
 | @ManyToMany                    | variable              | Defines the cardinality of M : M mapping                                                                                                                     |
 | @JoinColumn                    | variable(Foreign key) | Specifies, on which List<> of entity should be joined                                                                                                        |
+| @SpringBootTest                | Class                  | TestClass bean creation                                                                                                                                      |
 
 
 ---------

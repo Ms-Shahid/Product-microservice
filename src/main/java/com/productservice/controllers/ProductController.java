@@ -3,7 +3,7 @@ package com.productservice.controllers;
 import com.productservice.exceptions.ProductNotFoundException;
 import com.productservice.models.Product;
 import com.productservice.services.ProductService;
-import com.productservice.services.TokenService;
+//import com.productservice.services.TokenService;
 import org.hibernate.cache.spi.access.UnknownAccessTypeException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -17,29 +17,30 @@ import java.util.List;
 public class ProductController {
 
     private ProductService productService;
-    private TokenService tokenService;
+    //private TokenService tokenService;
 
-    public ProductController(@Qualifier("selfProductService") ProductService productService,
-                             TokenService tokenService){
+    public ProductController(ProductService productService
+                            ){
         this.productService = productService;
-        this.tokenService = tokenService;
+        //this.tokenService = tokenService;
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getProductById(@PathVariable("id") Long id) throws ProductNotFoundException {
+    public Product getProductById(@PathVariable("id") Long id) throws ProductNotFoundException {
         Product product = productService.getProductById(id);
+
         ResponseEntity<Product> productResponseEntity = new ResponseEntity<>(product, HttpStatus.OK);
-        return productResponseEntity;
+        return product;
     }
 
     @GetMapping("/validate/{id}")
     public Product validateTokenAndGetProduct( @RequestHeader("Token") String token,
                                                @PathVariable("id") Long id) throws ProductNotFoundException {
 
-        if(!tokenService.validateToken(token)){
-            System.out.println("Token -> " + token);
-            throw new UnknownAccessTypeException("User is not authorized");
-        }
+//        if(!tokenService.validateToken(token)){
+//            System.out.println("Token -> " + token);
+//            throw new UnknownAccessTypeException("User is not authorized");
+//        }
         Product product = productService.getProductById(id);
         ResponseEntity<Product> productResponseEntity = new ResponseEntity<>(product, HttpStatus.OK);
         return productResponseEntity.getBody();
