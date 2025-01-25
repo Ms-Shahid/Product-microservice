@@ -535,16 +535,18 @@ of `ProductService`, therefore, create a `Mock` of `ProductService`, as its an e
 - To achieve mocking, we should use _Doubles_ 
 - Doubles : Sample objects that is going to replace the actual object in testing -> Mocked Objects
 - Types of Doubles
-  - Mock : A double will return the value where ever it has handled, means it returns same value irrespective of any input passed
+  - **Mock** : A double will return the value where ever it has handled, means it returns same value irrespective of any input passed
     - > eg : when productService.getProductById(1), then return product1
     - Here irrespective of any value passed, it always returns `product1` as output. No dynamism possible
     - Most commonly used double. 
-  - Stub : Stub will try to replicate some behaviours of original class, means its able to adjust some behaviours
-  - Fake : Temporary data store, where instead of triggering to database, we can replicate `FAKE` mock to use `MAP`/ `HASHMAP` to sotre
+  - **Stub** : Stub will try to replicate some behaviours of original class, means its able to adjust some behaviours
+  - **Fake** : Temporary data store, where instead of triggering to database, we can replicate `FAKE` mock to use `MAP`/ `HASHMAP` to sotre
   the data similar to db. 
     - Fake is very close to reality.
 
 ----
+#### Testing-3
+
 
 
 ### Annotations
