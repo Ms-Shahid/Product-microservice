@@ -15,7 +15,8 @@ import java.util.List;
 public class Category extends BaseProduct{
 
     private String description;
-    @OneToMany(mappedBy = "category") // @OneToMany(mappedBy = "foreign-key-variable")
+    //@OneToMany(mappedBy = "category") // @OneToMany(mappedBy = "foreign-key-variable")
+    @OneToMany(fetch = FetchType.EAGER)
     private List<Product> productList;
 
 

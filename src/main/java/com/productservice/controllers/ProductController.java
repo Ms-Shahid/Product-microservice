@@ -3,7 +3,7 @@ package com.productservice.controllers;
 import com.productservice.exceptions.ProductNotFoundException;
 import com.productservice.models.Product;
 import com.productservice.services.ProductService;
-//import com.productservice.services.TokenService;
+import com.productservice.services.TokenService;
 import org.hibernate.cache.spi.access.UnknownAccessTypeException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -17,12 +17,12 @@ import java.util.List;
 public class ProductController {
 
     private ProductService productService;
-    //private TokenService tokenService;
+    private TokenService tokenService;
 
-    public ProductController(ProductService productService
-                            ){
+    public ProductController(@Qualifier("selfProductService") ProductService productService
+                            , TokenService tokenService){
         this.productService = productService;
-        //this.tokenService = tokenService;
+        this.tokenService = tokenService;
     }
 
     @GetMapping("/{id}")
@@ -37,10 +37,10 @@ public class ProductController {
     public Product validateTokenAndGetProduct( @RequestHeader("Token") String token,
                                                @PathVariable("id") Long id) throws ProductNotFoundException {
 
-//        if(!tokenService.validateToken(token)){
-//            System.out.println("Token -> " + token);
-//            throw new UnknownAccessTypeException("User is not authorized");
-//        }
+        if(!tokenService.validateToken(token)){
+            System.out.println("Token -> " + token);
+            throw new UnknownAccessTypeException("User is not authorized");
+        }
         Product product = productService.getProductById(id);
         ResponseEntity<Product> productResponseEntity = new ResponseEntity<>(product, HttpStatus.OK);
         return productResponseEntity.getBody();
@@ -80,10 +80,7 @@ public class ProductController {
 
     //selfProduct - HQL based
     @PostMapping
-    public Product createProduct(@RequestBody Product product){
+    public Product  createProduct(@RequestBody Product product){
         return productService.createProduct(product);
     }
-
-
-
 }
